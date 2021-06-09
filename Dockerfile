@@ -14,18 +14,20 @@ ENV RUST_MUSL_CROSS_TARGET=$TARGET
 #
 RUN apt-get update && \
     apt-get install -y \
-        build-essential \
-        cmake \
-        curl \
-        file \
-        git \
-        sudo \
-        xutils-dev \
-        unzip \
-        ca-certificates \
-        python3 \
-        python3-pip \
-        && \
+    build-essential \
+    cmake \
+    curl \
+    file \
+    git \
+    sudo \
+    xutils-dev \
+    libpq-dev \
+    libssl-dev \
+    unzip \
+    ca-certificates \
+    python3 \
+    python3-pip \
+    && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install cross-signed Let's Encrypt R3 CA certificate
@@ -39,7 +41,7 @@ RUN cd /tmp && curl -Lsq -o musl-cross-make.zip https://github.com/richfelker/mu
     mv musl-cross-make-$RUST_MUSL_MAKE_VER musl-cross-make && \
     cp /tmp/config.mak /tmp/musl-cross-make/config.mak && \
     cd /tmp/musl-cross-make && \
-    TARGET=$TARGET make install > /tmp/musl-cross-make.log && \
+    TARGET=$TARGET make -j$(nproc) install > /tmp/musl-cross-make.log && \
     ln -s /usr/local/musl/bin/$TARGET-strip /usr/local/musl/bin/musl-strip && \
     cd /tmp && \
     rm -rf /tmp/musl-cross-make /tmp/musl-cross-make.log
@@ -64,35 +66,51 @@ RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     echo "Building zlib" && \
     VERS=1.2.11 && \
-    CHECKSUM=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1 && \
     cd /home/rust/libs && \
     curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
-    echo "$CHECKSUM zlib-$VERS.tar.gz" > checksums.txt && \
-    sha256sum -c checksums.txt && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
     ./configure --static --archs="-fPIC" --prefix=$TARGET_HOME && \
-    make && sudo make install -j 4 && \
+    make && sudo make install -j$(nproc) && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt
 
 RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     export LD=$TARGET-ld && \
     echo "Building OpenSSL" && \
-    VERS=1.0.2u && \
-    CHECKSUM=ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16 && \
+    VERS=1.1.1i && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
-    echo "$CHECKSUM openssl-$VERS.tar.gz" > checksums.txt && \
-    sha256sum -c checksums.txt && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
-    ./Configure $OPENSSL_ARCH -fPIC --prefix=$TARGET_HOME && \
-    make -j4 && make install && \
+    ./Configure $OPENSSL_ARCH no-shared no-zlib no-tests -fPIC --prefix=$TARGET_HOME && \
+    make -j$(nproc) && make install && \
     cd .. && rm -rf openssl-$VERS.tar.gz openssl-$VERS checksums.txt
+
+
+RUN export CC=$TARGET_CC && \
+    export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
+    export LD=$TARGET-ld && \
+    echo "Building libpq" && \
+    VERS=11.11 && \
+    cd /tmp && \
+    curl -fLO "https://ftp.postgresql.org/pub/source/v$VERS/postgresql-$VERS.tar.gz" && \
+    tar xzf "postgresql-$VERS.tar.gz" && cd "postgresql-$VERS" && \
+    ./configure --with-openssl --without-readline --host=$TARGET --prefix=$TARGET_HOME && \
+    cd src/interfaces/libpq && make -j$(nproc) all-static-lib && make install-lib-static && \
+    make -j$(nproc) && make install && \
+    cd ../../bin/pg_config && make -j$(nproc) && make install && \
+    rm -r /tmp/*
+
 
 ENV OPENSSL_DIR=$TARGET_HOME/ \
     OPENSSL_INCLUDE_DIR=$TARGET_HOME/include/ \
     DEP_OPENSSL_INCLUDE=$TARGET_HOME/include/ \
     OPENSSL_LIB_DIR=$TARGET_HOME/lib/ \
-    OPENSSL_STATIC=1
+    OPENSSL_STATIC=1 \
+    PQ_LIB_STATIC=1 \
+    PQ_LIB_DIR=$TARGET_HOME/lib \
+    PG_CONFIG=$TARGET_HOME/bin/pg_config \
+    PKG_CONFIG_ALLOW_CROSS=true \
+    PKG_CONFIG_ALL_STATIC=true \
+    LIBZ_SYS_STATIC=1
 
 # The Rust toolchain to use when building our image
 ARG TOOLCHAIN=stable

@@ -2,7 +2,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 0 * * 2'
+    - cron: "0 0 * * 2"
 
 name: Build
 
@@ -13,77 +13,12 @@ jobs:
     strategy:
       matrix:
         env:
-          - IMAGE_TAG: aarch64-musl
+          - IMAGE_TAG: arm64-musl
             TARGET: aarch64-unknown-linux-musl
             OPENSSL_ARCH: linux-aarch64
             RUST_MUSL_MAKE_CONFIG: config.mak
             TOOLCHAIN: stable
-          - IMAGE_TAG: arm-musleabi
-            TARGET: arm-unknown-linux-musleabi
-            OPENSSL_ARCH: linux-armv4
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: arm-musleabihf
-            TARGET: arm-unknown-linux-musleabihf
-            OPENSSL_ARCH: linux-armv4
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: armv5te-musleabi
-            TARGET: armv5te-unknown-linux-musleabi
-            OPENSSL_ARCH: linux-armv4
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: armv7-musleabi
-            TARGET: armv7-unknown-linux-musleabi
-            OPENSSL_ARCH: linux-armv4
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: armv7-musleabihf
-            TARGET: armv7-unknown-linux-musleabihf
-            OPENSSL_ARCH: linux-armv4
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: i586-musl
-            TARGET: i586-unknown-linux-musl
-            OPENSSL_ARCH: linux-elf
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: i686-musl
-            TARGET: i686-unknown-linux-musl
-            OPENSSL_ARCH: linux-elf
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mips-musl
-            TARGET: mips-unknown-linux-musl
-            OPENSSL_ARCH: linux-mips32
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mips64-muslabi64
-            TARGET: mips64-unknown-linux-muslabi64
-            OPENSSL_ARCH: linux64-mips64
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mips64el-muslabi64
-            TARGET: mips64el-unknown-linux-muslabi64
-            OPENSSL_ARCH: linux64-mips64
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: mipsel-musl
-            TARGET: mipsel-unknown-linux-musl
-            OPENSSL_ARCH: linux-mips32
-            RUST_MUSL_MAKE_CONFIG: config.mak.32
-            TOOLCHAIN: stable
-          - IMAGE_TAG: powerpc64le-musl
-            TARGET: powerpc64le-unknown-linux-musl
-            OPENSSL_ARCH: linux-ppc64le
-            RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: nightly
-          # - IMAGE_TAG: s390x-musl
-          #   TARGET: s390x-unknown-linux-musl
-          #   OPENSSL_ARCH: linux64-s390x
-          #   RUST_MUSL_MAKE_CONFIG: config.mak
-          #   TOOLCHAIN: nightly
-          - IMAGE_TAG: x86_64-musl
+          - IMAGE_TAG: amd64-musl
             TARGET: x86_64-unknown-linux-musl
             OPENSSL_ARCH: linux-x86_64
             RUST_MUSL_MAKE_CONFIG: config.mak
@@ -128,7 +63,7 @@ jobs:
             OPENSSL_ARCH=${{ matrix.env.OPENSSL_ARCH }}
             RUST_MUSL_MAKE_CONFIG=${{ matrix.env.RUST_MUSL_MAKE_CONFIG }}
             TOOLCHAIN=${{ matrix.env.TOOLCHAIN }}
-          tags: messense/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64
+          tags: cookiemagic/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64
           load: true
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -143,20 +78,20 @@ jobs:
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
-            messense/rust-musl-cross:$IMAGE_TAG-amd64 cargo build
+            cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64 cargo build
       - name: Build and push multiarch image
         if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker push messense/rust-musl-cross:$IMAGE_TAG-amd64
+          docker push cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64
 
-          echo "image: messense/rust-musl-cross:$IMAGE_TAG
+          echo "image: cookiemagic/rust-musl-cross:$IMAGE_TAG
           manifests:
-            - image: messense/rust-musl-cross:$IMAGE_TAG-amd64
+            - image: cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64
               platform:
                 architecture: amd64
                 os: linux
-            - image: messense/rust-musl-cross:$IMAGE_TAG-arm64
+            - image: cookiemagic/rust-musl-cross:$IMAGE_TAG-arm64
               platform:
                 architecture: arm64
                 os: linux
