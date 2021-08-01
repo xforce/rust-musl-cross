@@ -85,18 +85,3 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker push cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64
 
-          echo "image: cookiemagic/rust-musl-cross:$IMAGE_TAG
-          manifests:
-            - image: cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64
-              platform:
-                architecture: amd64
-                os: linux
-            - image: cookiemagic/rust-musl-cross:$IMAGE_TAG-arm64
-              platform:
-                architecture: arm64
-                os: linux
-          " > manifest.yaml
-
-          curl -sqL -o manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
-          chmod +x manifest-tool
-          ./manifest-tool push from-spec manifest.yaml
