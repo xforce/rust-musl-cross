@@ -17,12 +17,12 @@ jobs:
             TARGET: aarch64-unknown-linux-musl
             OPENSSL_ARCH: linux-aarch64
             RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: stable
+            TOOLCHAIN: 1.54
           - IMAGE_TAG: amd64-musl
             TARGET: x86_64-unknown-linux-musl
             OPENSSL_ARCH: linux-x86_64
             RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: stable
+            TOOLCHAIN: 1.54
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v2
@@ -78,10 +78,9 @@ jobs:
         run: |
           docker run --rm \
             -v "$(pwd)/tests":/home/rust/src \
-            cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64 cargo build
-      - name: Build and push multiarch image
+            cookiemagic/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64 cargo build
+      - name: Push image
         if: github.ref == 'refs/heads/master'
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker push cookiemagic/rust-musl-cross:$IMAGE_TAG-amd64
-
+          docker push cookiemagic/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64
