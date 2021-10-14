@@ -17,12 +17,12 @@ jobs:
             TARGET: aarch64-unknown-linux-musl
             OPENSSL_ARCH: linux-aarch64
             RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: 1.54
+            TOOLCHAIN: beta
           - IMAGE_TAG: amd64-musl
             TARGET: x86_64-unknown-linux-musl
             OPENSSL_ARCH: linux-x86_64
             RUST_MUSL_MAKE_CONFIG: config.mak
-            TOOLCHAIN: 1.54
+            TOOLCHAIN: beta
     env: ${{ matrix.env }}
     steps:
       - uses: actions/checkout@v2

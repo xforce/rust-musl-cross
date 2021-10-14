@@ -113,7 +113,7 @@ ENV OPENSSL_DIR=$TARGET_HOME/ \
     LIBZ_SYS_STATIC=1
 
 # The Rust toolchain to use when building our image
-ARG TOOLCHAIN=1.54.0
+ARG TOOLCHAIN=beta
 # Install our Rust toolchain and the `musl` target.  We patch the
 # command-line we pass to the installer so that it won't attempt to
 # interact with the user or fool around with TTYs.  We also set the default
@@ -125,7 +125,7 @@ ARG TOOLCHAIN=1.54.0
 RUN chmod 755 /root/ && \
     curl https://sh.rustup.rs -sqSf | \
     sh -s -- -y --profile minimal --default-toolchain $TOOLCHAIN && \
-    rustup target add $TARGET || rustup component add --toolchain $TOOLCHAIN rust-src && \
+    rustup target add $TARGET && \
     rustup component add --toolchain $TOOLCHAIN rustfmt clippy && \
     rm -rf /root/.rustup/toolchains/$TOOLCHAIN-$(uname -m)-unknown-linux-gnu/share/
 
