@@ -113,7 +113,7 @@ ENV OPENSSL_DIR=$TARGET_HOME/ \
     LIBZ_SYS_STATIC=1
 
 # The Rust toolchain to use when building our image
-ARG TOOLCHAIN=beta
+ARG TOOLCHAIN=stable
 # Install our Rust toolchain and the `musl` target.  We patch the
 # command-line we pass to the installer so that it won't attempt to
 # interact with the user or fool around with TTYs.  We also set the default
