@@ -65,7 +65,7 @@ WORKDIR /home/rust/libs
 RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     echo "Building zlib" && \
-    VERS=1.2.11 && \
+    VERS=1.2.12 && \
     cd /home/rust/libs && \
     curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
