@@ -74,11 +74,11 @@ jobs:
           # https://github.com/moby/buildkit/issues/1896
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-      - name: Test Docker cargo build
-        run: |
-          docker run --rm \
-            -v "$(pwd)/tests":/home/rust/src \
-            cookiemagic/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64 cargo build
+      # - name: Test Docker cargo build
+      #   run: |
+      #     docker run --rm \
+      #       -v "$(pwd)/tests":/home/rust/src \
+      #       cookiemagic/rust-musl-cross:${{ matrix.env.IMAGE_TAG }}-amd64 cargo build
       - name: Push image
         if: github.ref == 'refs/heads/master'
         run: |
