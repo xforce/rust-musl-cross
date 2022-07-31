@@ -69,7 +69,7 @@ RUN export CC=$TARGET_CC && \
     cd /home/rust/libs && \
     curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
-    ./configure --static --archs="-fPIC" --prefix=$TARGET_HOME && \
+    CFLAGS="-O3 -fPIC" ./configure --static --prefix=$TARGET_HOME && \
     make && sudo make install -j$(nproc) && \
     cd .. && rm -rf zlib-$VERS.tar.gz zlib-$VERS checksums.txt
 
