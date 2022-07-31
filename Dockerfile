@@ -27,6 +27,7 @@ RUN apt-get update && \
     ca-certificates \
     python3 \
     python3-pip \
+    protobuf-compiler \
     && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
