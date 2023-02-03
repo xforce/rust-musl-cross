@@ -66,7 +66,7 @@ WORKDIR /home/rust/libs
 RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     echo "Building zlib" && \
-    VERS=1.2.12 && \
+    VERS=1.2.13 && \
     cd /home/rust/libs && \
     curl -sqLO https://zlib.net/zlib-$VERS.tar.gz && \
     tar xzf zlib-$VERS.tar.gz && cd zlib-$VERS && \
@@ -78,7 +78,7 @@ RUN export CC=$TARGET_CC && \
     export C_INCLUDE_PATH=$TARGET_C_INCLUDE_PATH && \
     export LD=$TARGET-ld && \
     echo "Building OpenSSL" && \
-    VERS=1.1.1i && \
+    VERS=1.1.1q && \
     curl -sqO https://www.openssl.org/source/openssl-$VERS.tar.gz && \
     tar xzf openssl-$VERS.tar.gz && cd openssl-$VERS && \
     ./Configure $OPENSSL_ARCH no-shared no-zlib no-tests -fPIC --prefix=$TARGET_HOME && \
